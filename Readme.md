@@ -101,7 +101,7 @@ Db.Db("example e").Join("left","user u","u.id = e.uid").Field("u.name,e.id").Whe
 |Query|字符串|自定义查询|
 
 #### 获取写入成功后的自增ID
-Save方法写入成功后，返回result实例。
+Save方法写入成功后，返回sql.Result实例。
 ```
 newId,err:=result.LastInsertId()
 newId即为新增的ID
