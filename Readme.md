@@ -95,6 +95,7 @@ Db.Db("example e").Join("left","user u","u.id = e.uid").Field("u.name,e.id").Whe
 |Having|having 字符串 含占位符? | HAVING条件语句|
 |Find|无|查询一条记录|
 |Select|无|查询多条记录|
+|Count|无|查询记录数|
 |Save|map[string]interface{}|写入数据|
 |Update|无|更新数据|
 |Del|无|删除记录|
