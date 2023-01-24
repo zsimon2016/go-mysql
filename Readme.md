@@ -5,7 +5,7 @@
 - 支持连接池  
 - 查询结果自动转换为map
 - 支持自定义查询
-
+- 支持事务
 #### 安装
 ```
 go get gitee.com/simon_git_code/go-mysql  
@@ -37,12 +37,12 @@ go get gitee.com/simon_git_code/go-mysql
 	Db.DbConn.DB.SetConnMaxLifetime(30 * time.Second)
 ```
 #### 查询方法说明  
-##### func (*DbQuery) Field  
+##### func (*DbQuery) Field 指定查询字段   
 ```
 func (*DbQuery) Field(field string) *DbQuery
 ```
 语句中指定被查询的字段，支持mysql查询函数
-##### func (*DbQuery) Where  
+##### func (*DbQuery) Where 指定查询条件，支持多个Where  
 ```
 func (*DbQuery) Where(wher string,v interface{})  *DbQuery
 ```
@@ -53,12 +53,12 @@ ret,err:=Db.Db("example").Field("*").Where("id = ?",1).Find()
 解析为查询原语：  
 SELECT * FROM `example` WHERE `id`= 1 
 ```
-#### func (*DbQuery) Or
+#### func (*DbQuery) Or 
 ```
 func (*DbQuery) Or(or string, v interface{})
 ```
 OR条件查询
-#### func (*DbQuery) In
+#### func (*DbQuery) In 
 ```
 func (*DbQuery) In(in string, v []interface{}) *DbQuery
 ```
@@ -74,17 +74,36 @@ SELECT * FROM `example` WHERE `id` IN (1,2,3)
 func (*DbQuery) OrIn(in string, v []interface{}) *DbQuery 
 ```
 OR IN查询 参数同in查询，只是在IN查询前加OR查询
-#### func (q *DbQuery) Join
+#### func (q *DbQuery) Join 联合查询  
 ```
 func (*DbQuery) Join(jType string, table string, on string) *DbQuery
 ```
-联合查询
-jType -- 参数包含LEFT JOIN(left)、RIGHT JOIN(right)、INNER JOIN(inner)。 
-table -- 表名，在配置中如果指明了前辍，table不需要包含前辍  
-on    -- 联合查询条件
+联合查询  
+```
+jType //参数包含LEFT JOIN(left)、RIGHT JOIN(right)、INNER JOIN(inner)。 
+table //表名，在配置中如果指明了前辍，table不需要包含前辍  
+on    //联合查询条件
+```
 ##### Example
 ```
 Db.Db("example e").Join("left","user u","u.id = e.uid").Field("u.name,e.id").Where("id = ?",1).Find()
+```  
+自定义查询  
+```
+Db.Db("example").Query("select id from example")
+```
+#### 事务  
+```
+db:=Db.Db("example")
+ctx, tx, err:=db.CreateDBTx()
+//写入
+db.TxSave(ctx,tx,map[string]interface{}{
+    "name":"simon",
+})
+if err:=tx.Commit();err!=nil {
+    tx.Rollback()
+}
+
 ```
 其他方法
 |名称|        参数  |    说明     |
@@ -95,7 +114,6 @@ Db.Db("example e").Join("left","user u","u.id = e.uid").Field("u.name,e.id").Whe
 |Having|having 字符串 含占位符? | HAVING条件语句|
 |Find|无|查询一条记录|
 |Select|无|查询多条记录|
-|Count|无|查询记录数|
 |Save|map[string]interface{}|写入数据|
 |Update|无|更新数据|
 |Del|无|删除记录|
